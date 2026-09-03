@@ -1,0 +1,21 @@
+{
+  "name": "活动雷达 ActivityRadar",
+  "short_name": "活动雷达",
+  "description": "聚合AI厂商线下活动与马拉松赛事及志愿者招募信息，一键切换城市，提前掌握附近动态",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f9f9f7",
+  "theme_color": "#f9f9f7",
+  "lang": "zh-CN",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities", "events"]
+}

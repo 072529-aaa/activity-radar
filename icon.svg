@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#f9f9f7"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#c96442" stroke-width="3" opacity="0.2"/>
+  <circle cx="256" cy="256" r="110" fill="none" stroke="#c96442" stroke-width="3" opacity="0.3"/>
+  <circle cx="256" cy="256" r="60" fill="none" stroke="#c96442" stroke-width="3" opacity="0.4"/>
+  <path d="M256 256 L256 96 A160 160 0 0 1 369 146 Z" fill="#c96442" opacity="0.15">
+    <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="4s" repeatCount="indefinite"/>
+  </path>
+  <circle cx="256" cy="256" r="10" fill="#c96442"/>
+  <circle cx="340" cy="180" r="7" fill="#4a7ab8">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="190" cy="320" r="7" fill="#d97757">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="310" cy="340" r="5" fill="#b8922a">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+</svg>

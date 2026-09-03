@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f9f9f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="活动雷达">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<title>活动雷达 · 发现身边的AI盛会与马拉松</title>
+<style>
+:root {
+  --bg: #f9f9f7; --bg-soft: #f3f3f0; --card: #ffffff; --card-hover: #fdfcfa;
+  --text: #1c1c1c; --text-secondary: #5c5c5c; --text-muted: #9a9a9a;
+  --border: #e8e8e5; --border-strong: #d8d8d4;
+  --accent: #c96442; --accent-soft: rgba(201,100,66,0.08);
+  --ai: #4a7ab8; --ai-soft: rgba(74,122,184,0.08);
+  --run: #d97757; --run-soft: rgba(217,119,87,0.08);
+  --vol: #b8922a; --vol-soft: rgba(184,146,42,0.08);
+  --wuhan: #b84242; --wuhan-soft: rgba(184,66,66,0.06);
+  --radius: 14px; --radius-sm: 9px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.08);
+  --serif: 'Noto Serif SC', 'Songti SC', 'SimSun', Georgia, serif;
+  --sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(249,249,247,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.nav-inner { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 24px; gap: 20px; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-weight: 700; font-size: 17px; color: var(--text); letter-spacing: 0.5px; flex-shrink: 0; }
+.logo-mark { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--accent); display: flex; align-items: center; justify-content: center; position: relative; }
+.logo-mark::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.logo small { font-family: var(--sans); font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: 2px; }
+.nav-actions { display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; }
+.loc-btn { display: flex; align-items: center; gap: 5px; padding: 7px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+.loc-btn:hover { border-color: var(--accent); color: var(--accent); }
+.loc-btn.locating { color: var(--accent); border-color: var(--accent); }
+.loc-btn.locating svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.city-selector { position: relative; flex-shrink: 0; }
+.city-btn { display: flex; align-items: center; gap: 6px; padding: 7px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.city-btn:hover { border-color: var(--border-strong); }
+.city-btn .city-name { font-weight: 500; }
+.city-btn .wuhan-tag { font-size: 10px; color: var(--wuhan); font-weight: 500; }
+.city-dropdown { position: absolute; top: calc(100% + 6px); right: 0; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; min-width: 180px; box-shadow: var(--shadow-hover); display: none; z-index: 200; }
+.city-dropdown.open { display: block; }
+.city-dropdown-title { font-size: 10px; color: var(--text-muted); padding: 6px 10px 4px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+.city-option { padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: space-between; transition: background 0.15s; color: var(--text-secondary); }
+.city-option:hover { background: var(--bg-soft); color: var(--text); }
+.city-option.active { color: var(--accent); background: var(--accent-soft); font-weight: 500; }
+.city-option .count { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+.search-box { position: relative; flex: 1; max-width: 300px; }
+.search-box input { width: 100%; padding: 8px 12px 8px 34px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+.search-box input:focus { border-color: var(--accent); }
+.search-box input::placeholder { color: var(--text-muted); }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+.hero { padding: 56px 24px 40px; text-align: center; border-bottom: 1px solid var(--border); position: relative; }
+.hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 300px; background: radial-gradient(ellipse at center, var(--accent-soft) 0%, transparent 70%); pointer-events: none; }
+.hero-content { position: relative; max-width: 640px; margin: 0 auto; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 500; margin-bottom: 20px; }
+.hero-eyebrow::before, .hero-eyebrow::after { content: ''; width: 24px; height: 1px; background: var(--accent); opacity: 0.4; }
+.hero h1 { font-family: var(--serif); font-size: 38px; font-weight: 700; line-height: 1.35; letter-spacing: -0.5px; margin-bottom: 16px; color: var(--text); }
+.hero h1 em { font-style: normal; color: var(--accent); position: relative; }
+.hero h1 em::after { content: ''; position: absolute; bottom: 2px; left: 0; right: 0; height: 6px; background: var(--accent-soft); z-index: -1; }
+.hero p { font-size: 15px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 32px; }
+.hero-stats { display: flex; justify-content: center; gap: 48px; }
+.stat-item { text-align: center; }
+.stat-num { font-family: var(--serif); font-size: 30px; font-weight: 700; line-height: 1; color: var(--text); }
+.stat-num.ai-c { color: var(--ai); }
+.stat-num.run-c { color: var(--run); }
+.stat-num.vol-c { color: var(--vol); }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; letter-spacing: 0.5px; }
+.stat-divider { width: 1px; background: var(--border); align-self: stretch; margin: 4px 0; }
+.filter-bar { max-width: 1120px; margin: 0 auto; padding: 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+.filter-chip { padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text-secondary); transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+.filter-chip:hover { border-color: var(--border-strong); color: var(--text); }
+.filter-chip.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 500; }
+.filter-divider { width: 1px; height: 20px; background: var(--border); margin: 0 2px; }
+.sort-select { margin-left: auto; padding: 6px 10px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 13px; cursor: pointer; font-family: inherit; outline: none; }
+.sort-select:focus { border-color: var(--accent); }
+.activity-section { max-width: 1120px; margin: 0 auto; padding: 0 24px 60px; }
+.section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.section-title { font-family: var(--serif); font-size: 19px; font-weight: 600; display: flex; align-items: baseline; gap: 10px; }
+.section-title .count-badge { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--text-muted); }
+.wuhan-note { font-size: 12px; color: var(--wuhan); display: flex; align-items: center; gap: 6px; }
+.wuhan-note::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--wuhan); }
+.activity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.activity-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; cursor: pointer; transition: all 0.25s ease; position: relative; }
+.activity-card:hover { transform: translateY(-2px); border-color: var(--border-strong); box-shadow: var(--shadow-hover); }
+.activity-card.wuhan-card { border-color: rgba(184,66,66,0.2); background: linear-gradient(180deg, var(--wuhan-soft) 0%, var(--card) 60px); }
+.wuhan-tag-corner { position: absolute; top: 16px; right: 18px; font-size: 10px; font-weight: 600; color: var(--wuhan); letter-spacing: 1px; padding: 2px 8px; border: 1px solid rgba(184,66,66,0.25); border-radius: 4px; background: rgba(184,66,66,0.04); }
+.card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-right: 70px; }
+.type-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 5px; font-size: 11px; font-weight: 500; letter-spacing: 0.3px; }
+.type-badge.ai { background: var(--ai-soft); color: var(--ai); }
+.type-badge.run { background: var(--run-soft); color: var(--run); }
+.type-badge .dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.card-date-tag { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+.card-title { font-family: var(--serif); font-size: 16px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; padding-right: 8px; color: var(--text); }
+.card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-meta { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.meta-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); }
+.meta-row svg { flex-shrink: 0; opacity: 0.6; }
+.meta-row .meta-value { color: var(--text-secondary); }
+.card-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+.vol-status { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.vol-status.recruiting { color: var(--vol); }
+.vol-status.recruiting .v-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--vol); animation: pulse 1.8s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.vol-status.none { color: var(--text-muted); }
+.card-arrow { color: var(--text-muted); transition: transform 0.2s, color 0.2s; }
+.activity-card:hover .card-arrow { color: var(--accent); transform: translateX(3px); }
+.empty-state { text-align: center; padding: 70px 20px; color: var(--text-muted); }
+.empty-state svg { margin-bottom: 14px; opacity: 0.3; }
+.empty-state h3 { font-family: var(--serif); font-size: 17px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+.empty-state p { font-size: 13px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(28,28,28,0.4); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border: 1px solid var(--border); border-radius: 18px; width: 100%; max-width: 620px; max-height: 85vh; overflow-y: auto; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: modal-in 0.25s ease; }
+@keyframes modal-in { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%; background: var(--bg-soft); border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: all 0.2s; font-size: 18px; line-height: 1; }
+.modal-close:hover { background: var(--text); color: var(--bg); }
+.modal-header { padding: 28px 28px 18px; border-bottom: 1px solid var(--border); }
+.modal-header.wuhan-h { border-bottom-color: rgba(184,66,66,0.2); }
+.modal-type-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.modal-title { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; color: var(--text); }
+.modal-organizer { font-size: 13px; color: var(--text-muted); }
+.modal-body { padding: 22px 28px 28px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.info-block { background: var(--bg-soft); border-radius: var(--radius-sm); padding: 12px 14px; }
+.info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; font-weight: 500; }
+.info-value { font-size: 13px; color: var(--text); font-weight: 500; line-height: 1.5; }
+.modal-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.85; margin-bottom: 20px; }
+.modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.modal-tag { padding: 3px 10px; background: var(--bg-soft); border-radius: 5px; font-size: 12px; color: var(--text-secondary); }
+.vol-section { background: var(--vol-soft); border: 1px solid rgba(184,146,42,0.15); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; }
+.vol-section.no-vol { background: var(--bg-soft); border-color: var(--border); }
+.vol-section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.vol-section-header h4 { font-family: var(--serif); font-size: 15px; font-weight: 600; color: var(--vol); }
+.vol-section.no-vol .vol-section-header h4 { color: var(--text-muted); }
+.recruiting-pill { background: var(--vol); color: #fff; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 8px; animation: pulse 1.8s ease-in-out infinite; }
+.vol-roles { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.vol-role { padding: 4px 10px; background: rgba(184,146,42,0.1); border-radius: 5px; font-size: 12px; color: var(--vol); font-weight: 500; }
+.vol-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.vol-detail { font-size: 12px; }
+.vol-detail .v-label { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+.vol-detail .v-value { color: var(--text); font-weight: 500; font-size: 13px; }
+.vol-benefits { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+.vol-benefits strong { color: var(--vol); font-weight: 600; }
+.modal-actions { display: flex; gap: 10px; }
+.btn { flex: 1; padding: 11px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; text-align: center; }
+.btn-primary { background: var(--text); color: var(--bg); }
+.btn-primary:hover { background: #333; }
+.btn-vol { background: var(--vol); color: #fff; }
+.btn-vol:hover { background: #a08020; }
+.btn-outline { background: transparent; border: 1px solid var(--border-strong); color: var(--text-secondary); }
+.btn-outline:hover { border-color: var(--text); color: var(--text); }
+.vol-zone { max-width: 1120px; margin: 0 auto 60px; padding: 0 24px; display: none; }
+.vol-zone.active { display: block; }
+.zone-banner { background: var(--vol-soft); border: 1px solid rgba(184,146,42,0.15); border-radius: var(--radius); padding: 22px 26px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+.zone-banner h3 { font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--vol); margin-bottom: 3px; }
+.zone-banner p { font-size: 13px; color: var(--text-secondary); }
+.zone-stats { display: flex; gap: 28px; }
+.zone-stat .num { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--vol); }
+.zone-stat .lbl { font-size: 11px; color: var(--text-muted); }
+.footer { border-top: 1px solid var(--border); padding: 28px 24px; text-align: center; color: var(--text-muted); font-size: 12px; line-height: 1.9; }
+.footer .footer-title { font-family: var(--serif); font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 10px; font-size: 13px; z-index: 999; opacity: 0; transition: all 0.3s; pointer-events: none; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (max-width: 768px) {
+  .nav-inner { height: 54px; padding: 0 14px; gap: 8px; }
+  .logo { font-size: 15px; }
+  .logo small { display: none; }
+  .search-box { max-width: none; order: 3; flex-basis: 100%; }
+  .nav-actions { flex-wrap: wrap; }
+  .hero { padding: 36px 16px 28px; }
+  .hero h1 { font-size: 26px; }
+  .hero p { font-size: 14px; }
+  .hero-stats { gap: 28px; }
+  .stat-num { font-size: 22px; }
+  .filter-bar { padding: 16px 14px; }
+  .activity-section { padding: 0 14px 40px; }
+  .activity-grid { grid-template-columns: 1fr; }
+  .modal-header { padding: 22px 18px 14px; }
+  .modal-body { padding: 18px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .vol-details { grid-template-columns: 1fr; }
+  .modal-actions { flex-direction: column; }
+  .city-dropdown { right: auto; left: 0; }
+  .sort-select { margin-left: 0; width: 100%; order: 3; flex-basis: 100%; }
+  .loc-btn span { display: none; }
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo"><div class="logo-mark"></div>活动雷达<small>ActivityRadar</small></div>
+    <div class="nav-actions">
+      <div class="search-box">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="搜索活动、地点、主办方…">
+      </div>
+      <button class="loc-btn" id="locBtn" title="使用我的位置">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="4"/></svg>
+        <span>定位</span>
+      </button>
+      <div class="city-selector">
+        <button class="city-btn" id="cityBtn">
+          <span class="city-name" id="currentCity">武汉</span>
+          <span class="wuhan-tag" id="wuhanTag">本地</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="city-dropdown" id="cityDropdown"><div class="city-dropdown-title">选择城市</div><div id="cityList"></div></div>
+      </div>
+    </div>
+  </div>
+</nav>
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">城市活动脉搏</div>
+    <h1>不错过身边每一场<em>值得参与</em>的活动</h1>
+    <p>聚合 AI 厂商线下盛会与马拉松赛事动态，同步追踪志愿者招募机会。<br>切换城市，即刻知晓附近正在发生什么。</p>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num ai-c" id="statAi">0</div><div class="stat-label">AI 活动</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item"><div class="stat-num run-c" id="statRun">0</div><div class="stat-label">马拉松赛事</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item"><div class="stat-num vol-c" id="statVol">0</div><div class="stat-label">志愿者招募中</div></div>
+    </div>
+  </div>
+</section>
+<div class="filter-bar">
+  <div class="filter-group" id="typeFilters">
+    <button class="filter-chip active" data-type="all">全部</button>
+    <button class="filter-chip" data-type="ai">AI 活动</button>
+    <button class="filter-chip" data-type="marathon">马拉松</button>
+    <button class="filter-chip" data-type="volunteer">志愿者招募</button>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group" id="timeFilters">
+    <button class="filter-chip active" data-time="all">全部时间</button>
+    <button class="filter-chip" data-time="week">本周</button>
+    <button class="filter-chip" data-time="month">本月</button>
+    <button class="filter-chip" data-time="quarter">未来三月</button>
+  </div>
+  <select class="sort-select" id="sortSelect">
+    <option value="date">按时间排序</option>
+    <option value="wuhan">武汉优先</option>
+    <option value="volunteer">志愿者优先</option>
+  </select>
+</div>
+<section class="activity-section" id="activitySection">
+  <div class="section-header">
+    <div class="section-title"><span id="sectionTitleText">全部活动</span><span class="count-badge" id="resultCount">0 场</span></div>
+    <div class="wuhan-note">武汉活动已优先突出</div>
+  </div>
+  <div class="activity-grid" id="activityGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <h3>未找到匹配的活动</h3><p>试试切换城市、调整筛选条件或更换关键词</p>
+  </div>
+</section>
+<section class="vol-zone" id="volunteerZone">
+  <div class="zone-banner">
+    <div><h3>志愿者招募专区</h3><p>正在招募志愿者的活动，报名从速</p></div>
+    <div class="zone-stats">
+      <div class="zone-stat"><div class="num" id="zoneCount">0</div><div class="lbl">招募中活动</div></div>
+      <div class="zone-stat"><div class="num" id="zoneRoles">0</div><div class="lbl">岗位类型</div></div>
+    </div>
+  </div>
+  <div class="activity-grid" id="volunteerGrid"></div>
+</section>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-header" id="modalHeader">
+      <div class="modal-type-row" id="modalTypeRow"></div>
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="modal-organizer" id="modalOrganizer"></div>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid" id="modalInfoGrid"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-tags" id="modalTags"></div>
+      <div id="modalVolunteer"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<footer class="footer">
+  <div class="footer-title">活动雷达 ActivityRadar</div>
+  <p>聚合 AI 厂商线下活动与马拉松赛事及志愿者招募信息 · 武汉本地活动优先展示</p>
+  <p>数据仅供参考，具体活动信息请以官方发布为准</p>
+</footer>
+<script>
+const activities=[
+{id:1,type:"ai",category:"博览会",city:"武汉",isWuhan:true,title:"2026武汉（国际）人工智能与机器人博览会",location:"武汉国际博览中心",date:"2026-09-04",endDate:"2026-09-06",organizer:"武汉市人民政府 / 中国人工智能学会",description:"华中地区规模最大的AI与机器人专业展会，设置工业智能装备、商业服务机器人等七大展区，汇聚500余家企业，同期举办AI大模型工业落地会议与人工智能应用峰会。",tags:["大模型","机器人","工业落地","具身智能"],volunteer:{recruiting:true,roles:["展会引导","技术翻译","媒体接待","会场服务"],count:120,deadline:"2026-08-30",benefits:["志愿者证书","免费餐饮","展会纪念品","优先参与行业交流"],contact:"志愿者邮箱：volunteer@wuhan-ai-expo.com"}},
+{id:2,type:"ai",category:"产业大会",city:"武汉",isWuhan:true,title:"聚合智能产业发展大会2026",location:"武汉光谷科技会展中心",date:"2026-09-08",endDate:"2026-09-09",organizer:"武汉东湖新技术开发区管委会",description:"聚焦聚合智能产业生态，开设具身机器人与产业协同发展论坛、AI与行业融合论坛，涉及智能体在车载、工业、政务场景的落地实践，同步设置产业对接与项目路演。",tags:["聚合智能","具身机器人","产业对接","项目路演"],volunteer:{recruiting:true,roles:["签到接待","论坛会务","路演协助","嘉宾引导"],count:60,deadline:"2026-09-01",benefits:["大会证书","工作餐","行业人脉拓展"],contact:"报名电话：027-8765xxxx"}},
+{id:3,type:"ai",category:"博览会",city:"武汉",isWuhan:true,title:"武汉AI系列博览会（三展联动）",location:"武汉国际博览中心",date:"2026-09-22",endDate:"2026-09-24",organizer:"湖北省经信厅 / 武汉市科技局",description:"武汉国际AI应用及消费电子博览会、中国(武汉)国际AI算力应用产业博览会、武汉国际人形机器人与具身智能展览会三展联动，1200余家展商参展，配套具身智能大模型现场推理秀。",tags:["AI应用","算力","人形机器人","消费电子"],volunteer:{recruiting:true,roles:["展区服务","技术支持助理","观众引导","后勤保障"],count:200,deadline:"2026-09-15",benefits:["志愿服务证明","三餐保障","交通补贴","展会通票"],contact:"微信公众号：武汉AI博览会"}},
+{id:4,type:"ai",category:"产业大会",city:"武汉",isWuhan:true,title:"ACCON 2026高端芯片产业创新发展大会",location:"武汉·中国光谷",date:"2026-10-22",endDate:"2026-10-23",organizer:"中国半导体行业协会 / 武汉市政府",description:"聚焦AI底层算力与芯片支撑，同期配套AI-NATIVE元生代创业营招募，面向AI智能体开发者、创业者提供技术验证、资本对接与产业孵化支持，覆盖智能体全产业链交流。",tags:["芯片","算力","AI-NATIVE","创业营"],volunteer:{recruiting:false,roles:[],count:0,deadline:"",benefits:[],contact:""}},
+{id:5,type:"ai",category:"创新大赛",city:"武汉",isWuhan:true,title:"2026全国AI智能体创新开发大赛（武汉主赛场）",location:"武汉光谷创业街（主赛场）",date:"2026-09-15",endDate:"2026-12-10",organizer:"湖北省科技厅 / 武汉市人才工作局",description:"设武汉为主赛场，面向35岁以下青年开发者，覆盖智能体全栈开发与场景落地两大赛道，配套免费算力、创业孵化支持，优质项目可对接武汉本地产业资源，决赛预计12月落地武汉。",tags:["智能体","开发者大赛","创业孵化","免费算力"],volunteer:{recruiting:true,roles:["赛事运营","技术评审助理","选手服务","直播协助"],count:40,deadline:"2026-09-10",benefits:["赛事证书","专家指导机会","创业资源对接"],contact:"官网：www.ai-agent-contest.cn"}},
+{id:6,type:"ai",category:"创新大赛",city:"武汉",isWuhan:true,title:"\"灵智江城·赛博龙虾\"智能体创新大赛",location:"武汉江岸区·汉口文创谷",date:"2026-09-20",endDate:"2026-11-30",organizer:"武汉市江岸区人民政府",description:"以\"线上搓虾·线下嘬虾\"为特色，聚焦涉江治水、智慧教育、智慧医疗等五大本土场景，设技术挑战、场景创新两大赛道，优胜项目可获得落地孵化与资金支持，线下决赛落地武汉江岸。",tags:["智能体","本土场景","智慧医疗","创业扶持"],volunteer:{recruiting:true,roles:["活动执行","选手对接","物料管理","现场摄影"],count:30,deadline:"2026-09-18",benefits:["志愿者证明","龙虾节专属福利","创业园区资源"],contact:"报名微信：赛博龙虾助手"}},
+{id:7,type:"ai",category:"厂商巡展",city:"武汉",isWuhan:true,title:"火山引擎AI创新巡展·光谷站",location:"武汉光谷凯悦酒店",date:"2026-10-12",endDate:"2026-10-12",organizer:"字节跳动 / 火山引擎",description:"发布ArkClaw智能体平台万人体验季，向本地创业者开放1万个免费账号，展示Trae AI编程助手、扣子Coze等智能体产品最新成果，设置开发者Workshop与产品体验区。",tags:["火山引擎","Trae","Coze","智能体平台"],volunteer:{recruiting:false,roles:[],count:0,deadline:"",benefits:[],contact:""}},
+{id:8,type:"ai",category:"黑客松",city:"武汉",isWuhan:true,title:"武汉AI智能体黑客松·光谷专场",location:"武汉光谷软件园",date:"2026-10-18",endDate:"2026-10-19",organizer:"武汉东湖高新区 / 光谷创业咖啡",description:"48小时极限开发，聚焦AI智能体场景创新，提供大模型API免费额度与算力支持，设一等奖5万元，获奖团队可获得光谷孵化器入驻资格与投资人对接。",tags:["黑客松","48小时","智能体","创业"],volunteer:{recruiting:true,roles:["赛事志愿者","技术支持","餐饮保障","媒体宣传"],count:25,deadline:"2026-10-10",benefits:["黑客松纪念T恤","免费餐饮","创业者人脉"],contact:"邮箱：hackathon@opticsvalley.com"}},
+{id:9,type:"marathon",category:"半程马拉松",city:"武汉",isWuhan:true,title:"2026武汉后官湖半程马拉松",location:"武汉蔡甸区后官湖湿地公园",date:"2026-10-18",endDate:"2026-10-18",organizer:"武汉市体育局 / 蔡甸区人民政府",description:"环绕后官湖绿道的经典半程赛事，赛道风景优美，设半程马拉松（21.0975km）和健康跑（5km）两个项目，参赛规模8000人，完赛奖牌融合楚文化设计元素。",tags:["半程马拉松","环湖赛道","楚文化奖牌","健康跑"],volunteer:{recruiting:true,roles:["起点服务","赛道补给","终点引导","医疗辅助","存包服务"],count:500,deadline:"2026-10-05",benefits:["志愿者服装","赛事证书","工作餐","保险"],contact:"官网：www.houguanhu-marathon.com"}},
+{id:10,type:"marathon",category:"半程马拉松",city:"武汉",isWuhan:true,title:"2026武汉光谷半程马拉松",location:"武汉光谷广场（起点）",date:"2026-11-08",endDate:"2026-11-08",organizer:"武汉东湖新技术开发区管委会",description:"穿越光谷核心区的科技主题马拉松，赛道经过光谷步行街、华中科技大学、光谷生物城等地标，设半程马拉松和迷你跑，参赛规模10000人。",tags:["半程马拉松","科技主题","光谷地标","高校赛道"],volunteer:{recruiting:true,roles:["起点检录","赛道指引","补给站服务","完赛服务","医疗志愿者"],count:600,deadline:"2026-10-25",benefits:["定制志愿者服","志愿服务证书","赛事包","餐饮保障"],contact:"微信公众号：光谷马拉松"}},
+{id:11,type:"marathon",category:"迷你马拉松",city:"武汉",isWuhan:true,title:"2026武汉江滩迷你马拉松",location:"武汉汉口江滩",date:"2026-09-27",endDate:"2026-09-27",organizer:"武汉市江岸区文化和旅游局",description:"长江之滨的亲子友好型迷你马拉松，设10km竞速组和5km亲子组，沿途可欣赏长江大桥与黄鹤楼远景，适合跑步新手与家庭参与。",tags:["迷你马拉松","亲子跑","江滩风景","新手友好"],volunteer:{recruiting:true,roles:["签到发放","赛道服务","亲子区协助","医疗点辅助"],count:150,deadline:"2026-09-20",benefits:["志愿者T恤","活动证书","免费餐饮"],contact:"电话：027-8276xxxx"}},
+{id:12,type:"ai",category:"黑客松",city:"上海",isWuhan:false,title:"外滩黑客松·AI Coding大赛",location:"上海外滩金融中心",date:"2026-07-18",endDate:"2026-07-20",organizer:"上海市黄浦区 / 多家AI厂商联合",description:"国内头部AI Coding平台首次集体赛事，Trae、通义灵码、CodeBuddy、Comate等平台联合承办，聚焦AI编程工具创新与开发者生态。",tags:["AI Coding","黑客松","Trae","多平台联合"],volunteer:{recruiting:false,roles:[],count:0,deadline:"",benefits:[],contact:""}},
+{id:13,type:"ai",category:"创新大赛",city:"北京",isWuhan:false,title:"百度搜索·文心智能体创新大赛",location:"北京百度大厦（决赛）",date:"2026-08-01",endDate:"2026-11-30",organizer:"百度 / 英伟达",description:"全球规模较大的智能体专项赛事，聚焦技术突破与场景应用双赛道，基于文心智能体平台开发，总奖金池超百万元。",tags:["文心一言","智能体","百度","英伟达"],volunteer:{recruiting:false,roles:[],count:0,deadline:"",benefits:[],contact:""}},
+{id:14,type:"ai",category:"创新大赛",city:"杭州",isWuhan:false,title:"通义千问AI挑战赛",location:"杭州阿里巴巴西溪园区",date:"2026-08-15",endDate:"2026-12-15",organizer:"阿里云 / 英伟达 / 天池平台",description:"依托天池平台举办，设Code Qwen算法赛道、Agent Builder创意赛道，面向全球开发者征集大模型应用创新方案。",tags:["通义千问","Qwen","天池","Agent"],volunteer:{recruiting:false,roles:[],count:0,deadline:"",benefits:[],contact:""}},
+{id:15,type:"ai",category:"黑客松",city:"深圳",isWuhan:false,title:"腾讯云黑客松Agent应用创新挑战赛",location:"深圳腾讯滨海大厦",date:"2026-09-10",endDate:"2026-09-12",organizer:"腾讯云",description:"设企业微信智能体、公众号智能体、创新创意三大赛道，基于腾讯云元器平台开发，获奖项目可获得腾讯云资源与投资对接。",tags:["腾讯云","元器","企业微信","智能体"],volunteer:{recruiting:true,roles:["赛事服务","技术支持","选手接待"],count:35,deadline:"2026-09-05",benefits:["腾讯云周边","赛事证书","工作餐"],contact:"邮箱：hackathon@tencent.com"}},
+{id:16,type:"ai",category:"开发者大赛",city:"合肥",isWuhan:false,title:"iFLYTEK AI开发者大赛",location:"合肥科大讯飞总部",date:"2026-07-01",endDate:"2026-10-31",organizer:"科大讯飞",description:"以智能体为核心驱动赛道，覆盖办公、教育、健康、制造等垂直场景，基于星火大模型与星辰Agent平台开发。",tags:["讯飞星火","星辰Agent","开发者大赛","垂直场景"],volunteer:{recruiting:false,roles:[],count:0,deadline:"",benefits:[],contact:""}},
+{id:17,type:"ai",category:"高校赛事",city:"武汉",isWuhan:true,title:"\"星火杯\"大模型应用创新赛·华中赛区",location:"华中科技大学（武汉）",date:"2026-10-25",endDate:"2026-10-26",organizer:"科大讯飞 / 华中科技大学",description:"面向全球高校开发者，基于星辰Agent平台开发智能体，2026年奖金池25万元，华中赛区落地武汉，优胜队伍晋级全国总决赛。",tags:["高校赛事","星火杯","华中赛区","智能体"],volunteer:{recruiting:true,roles:["赛场服务","选手接待","技术支持","评审协助"],count:45,deadline:"2026-10-18",benefits:["赛事证书","讯飞周边","工作餐","校招绿色通道"],contact:"邮箱：spark-cup@iflytek.com"}},
+{id:18,type:"marathon",category:"全程马拉松",city:"北京",isWuhan:false,title:"2026北京马拉松",location:"北京天安门广场（起点）",date:"2026-11-02",endDate:"2026-11-02",organizer:"中国田径协会 / 北京市体育局",description:"国内最高水平的马拉松赛事之一，全马项目，参赛规模30000人，赛道经过天安门、长安街、奥林匹克公园等地标。",tags:["全程马拉松","金标赛事","天安门","3万人规模"],volunteer:{recruiting:true,roles:["起点服务","赛道补给","终点引导","医疗辅助","翻译服务"],count:3000,deadline:"2026-10-15",benefits:["志愿者服装","赛事证书","工作餐","保险"],contact:"官网：www.beijing-marathon.com"}},
+{id:19,type:"marathon",category:"全程马拉松",city:"上海",isWuhan:false,title:"2026上海马拉松",location:"上海外滩金牛广场（起点）",date:"2026-11-23",endDate:"2026-11-23",organizer:"中国田径协会 / 上海市体育局",description:"国际田联白金标赛事，全马项目，参赛规模38000人，赛道贯穿外滩、南京路、淮海路、徐汇滨江等上海标志性路段。",tags:["全程马拉松","白金标","外滩","3.8万人"],volunteer:{recruiting:true,roles:["起点检录","赛道服务","补给站","完赛服务","医疗志愿者"],count:4000,deadline:"2026-10-31",benefits:["上马志愿者服","志愿服务证书","餐饮保障","保险"],contact:"官网：www.shmarathon.com"}},
+{id:20,type:"marathon",category:"全程马拉松",city:"杭州",isWuhan:false,title:"2026杭州马拉松",location:"杭州黄龙体育中心（起点）",date:"2026-11-16",endDate:"2026-11-16",organizer:"中国田径协会 / 杭州市体育局",description:"国际田联金标赛事，设全马、半马、迷你跑，赛道经过西湖、钱塘江、钱江新城，参赛规模35000人。",tags:["全程马拉松","金标赛事","西湖","钱塘江"],volunteer:{recruiting:true,roles:["赛事服务","赛道指引","补给站","医疗辅助"],count:2500,deadline:"2026-10-25",benefits:["杭马志愿者服","证书","工作餐","保险"],contact:"官网：www.hzim.org"}},
+{id:21,type:"marathon",category:"全程马拉松",city:"成都",isWuhan:false,title:"2026成都马拉松",location:"成都金沙遗址博物馆（起点）",date:"2026-10-26",endDate:"2026-10-26",organizer:"中国田径协会 / 成都市人民政府",description:"国际田联金标赛事，全马项目，赛道经过天府广场、宽窄巷子、锦江公园、天府新区，参赛规模30000人。",tags:["全程马拉松","金标赛事","天府之国","美食赛道"],volunteer:{recruiting:true,roles:["起点服务","赛道补给","终点服务","医疗志愿者"],count:2800,deadline:"2026-10-10",benefits:["成马志愿者服","证书","餐饮","保险"],contact:"官网：www.chengdu-marathon.org"}},
+{id:22,type:"marathon",category:"全程马拉松",city:"广州",isWuhan:false,title:"2026广州马拉松",location:"广州天河体育中心（起点）",date:"2026-12-07",endDate:"2026-12-07",organizer:"中国田径协会 / 广州市人民政府",description:"国际田联金标赛事，全马项目，赛道经过珠江新城、广州塔、海心沙、猎德大桥，参赛规模30000人。",tags:["全程马拉松","金标赛事","广州塔","珠江"],volunteer:{recruiting:true,roles:["赛事服务","赛道指引","补给站","医疗辅助","终点服务"],count:2600,deadline:"2026-11-15",benefits:["广马志愿者服","证书","工作餐","保险"],contact:"官网：www.guangzhou-marathon.com"}},
+{id:23,type:"marathon",category:"半程马拉松",city:"南京",isWuhan:false,title:"2026南京马拉松",location:"南京奥体中心（起点）",date:"2026-11-09",endDate:"2026-11-09",organizer:"中国田径协会 / 南京市体育局",description:"国际田联铜标赛事，设全马、半马、迷你跑，赛道经过中山陵、夫子庙、玄武湖、长江大桥，参赛规模28000人。",tags:["全程马拉松","半程马拉松","中山陵","玄武湖"],volunteer:{recruiting:true,roles:["起点服务","赛道补给","终点引导","医疗辅助"],count:2000,deadline:"2026-10-20",benefits:["南马志愿者服","证书","餐饮","保险"],contact:"官网：www.nj-marathon.com"}},
+{id:24,type:"marathon",category:"全程马拉松",city:"长沙",isWuhan:false,title:"2026长沙马拉松",location:"长沙贺龙体育中心（起点）",date:"2026-10-19",endDate:"2026-10-19",organizer:"中国田径协会 / 长沙市体育局",description:"国际田联铜标赛事，全马项目，赛道经过橘子洲、岳麓山、湘江风光带，参赛规模24000人，以\"红色马拉松\"为特色。",tags:["全程马拉松","橘子洲","岳麓山","红色主题"],volunteer:{recruiting:true,roles:["赛事服务","赛道指引","补给站","医疗志愿者"],count:1800,deadline:"2026-10-05",benefits:["长马志愿者服","证书","工作餐","保险"],contact:"官网：www.changsha-marathon.com"}},
+{id:25,type:"marathon",category:"半程马拉松",city:"重庆",isWuhan:false,title:"2026重庆女子半程马拉松",location:"重庆南滨路（起点）",date:"2026-11-02",endDate:"2026-11-02",organizer:"中国田径协会 / 重庆市体育局",description:"国内唯一的国际田联铜标女子半程马拉松，设半程马拉松和5km乐跑，仅限女性报名，参赛规模12000人，完赛奖牌为精美项链设计。",tags:["女子半程","半程马拉松","南滨路","项链奖牌"],volunteer:{recruiting:true,roles:["起点服务","赛道补给","终点服务","医疗辅助","礼仪服务"],count:800,deadline:"2026-10-20",benefits:["志愿者服装","证书","工作餐","保险"],contact:"官网：www.cqwomensmarathon.com"}},
+{id:26,type:"ai",category:"技术峰会",city:"武汉",isWuhan:true,title:"2026武汉AI+教育融合发展峰会",location:"武汉国际会议中心",date:"2026-10-15",endDate:"2026-10-16",organizer:"湖北省教育厅 / 武汉市教育局",description:"聚焦AI技术在教育场景的落地应用，邀请国内知名高校与教育科技企业分享智能体教学、AI助教、个性化学习等前沿实践，设置教育智能体产品体验区。",tags:["AI+教育","智能体教学","AI助教","教育科技"],volunteer:{recruiting:true,roles:["嘉宾接待","会场服务","技术支持","资料分发"],count:50,deadline:"2026-10-08",benefits:["峰会证书","工作餐","教育行业人脉"],contact:"邮箱：ai-edu@wuhan.gov.cn"}},
+{id:27,type:"ai",category:"厂商活动",city:"武汉",isWuhan:true,title:"通义灵码开发者日·武汉站",location:"武汉光谷创业咖啡",date:"2026-09-28",endDate:"2026-09-28",organizer:"阿里云 / 通义灵码",description:"面向武汉开发者的AI编程工具深度体验活动，包含通义灵码功能演示、实战Workshop、开发者圆桌讨论，现场提供阿里云API免费额度。",tags:["通义灵码","AI编程","开发者日","Workshop"],volunteer:{recruiting:false,roles:[],count:0,deadline:"",benefits:[],contact:""}},
+{id:28,type:"ai",category:"产业论坛",city:"武汉",isWuhan:true,title:"2026中国（武汉）智能体产业生态论坛",location:"武汉会议中心",date:"2026-11-06",endDate:"2026-11-07",organizer:"中国人工智能学会 / 武汉市科技局",description:"聚焦智能体产业生态构建，邀请头部AI厂商、投资机构、高校研究院共同探讨智能体技术标准、商业模式与落地路径，发布武汉智能体产业发展白皮书。",tags:["智能体产业","生态论坛","白皮书","投资对接"],volunteer:{recruiting:true,roles:["论坛会务","嘉宾接待","记录整理","现场协调"],count:40,deadline:"2026-10-30",benefits:["论坛证书","工作餐","行业资源对接"],contact:"微信公众号：武汉智能体论坛"}},
+{id:29,type:"marathon",category:"越野跑",city:"武汉",isWuhan:true,title:"2026武汉木兰山越野挑战赛",location:"武汉黄陂区木兰山风景区",date:"2026-11-15",endDate:"2026-11-15",organizer:"武汉市黄陂区文化和旅游局",description:"武汉近郊经典越野赛事，设50km、25km、10km三个组别，赛道穿越木兰山森林与古道，累计爬升1800米，参赛规模1500人。",tags:["越野跑","木兰山","50km","森林赛道"],volunteer:{recruiting:true,roles:["打卡点服务","补给站","赛道指引","救援辅助"],count:120,deadline:"2026-11-01",benefits:["越野赛志愿者服","证书","餐饮","保险"],contact:"官网：www.mulan-trail.com"}},
+{id:30,type:"ai",category:"技术沙龙",city:"武汉",isWuhan:true,title:"AIGC商业化路径探索沙龙·武汉站",location:"武汉汉口江滩·共享空间",date:"2026-09-14",endDate:"2026-09-14",organizer:"武汉创业者协会 / 光谷AI俱乐部",description:"聚焦AIGC商业化落地，邀请本地AI创业者分享AI漫剧变现、智能体SaaS、AI内容工厂等实战案例，设置项目路演与投资人面对面环节。",tags:["AIGC","商业化","创业沙龙","项目路演"],volunteer:{recruiting:true,roles:["签到接待","现场执行","摄影记录","嘉宾对接"],count:15,deadline:"2026-09-10",benefits:["免费参会","创业者人脉","活动证书"],contact:"微信：光谷AI俱乐部"}}
+];
+const cityCoords={"武汉":{lat:30.5928,lng:114.3055},"北京":{lat:39.9042,lng:116.4074},"上海":{lat:31.2304,lng:121.4737},"广州":{lat:23.1291,lng:113.2644},"深圳":{lat:22.5431,lng:114.0579},"杭州":{lat:30.2741,lng:120.1551},"成都":{lat:30.5728,lng:104.0668},"南京":{lat:32.0603,lng:118.7969},"长沙":{lat:28.2282,lng:112.9388},"重庆":{lat:29.5630,lng:106.5516},"合肥":{lat:31.8206,lng:117.2272},"厦门":{lat:24.4798,lng:118.0894}};
+const state={currentCity:"武汉",typeFilter:"all",timeFilter:"all",searchQuery:"",sortBy:"date"};
+const cities=["武汉","北京","上海","广州","深圳","杭州","成都","南京","长沙","重庆","合肥","厦门"];
+function formatDate(ds){const d=new Date(ds);return `${d.getMonth()+1}月${d.getDate()}日`;}
+function formatDateRange(s,e){return s===e?formatDate(s):`${formatDate(s)} - ${formatDate(e)}`;}
+function getDaysUntil(ds){const now=new Date();now.setHours(0,0,0,0);const t=new Date(ds);t.setHours(0,0,0,0);return Math.ceil((t-now)/(1000*60*60*24));}
+function isWithinTime(ds,f){const d=getDaysUntil(ds);if(d<0)return false;if(f==="week")return d<=7;if(f==="month")return d<=30;if(f==="quarter")return d<=90;return true;}
+function getTypeLabel(t){return t==="ai"?"AI 活动":t==="marathon"?"马拉松":"志愿者";}
+function distance(lat1,lng1,lat2,lng2){const R=6371,toRad=x=>x*Math.PI/180;const dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function getFiltered(){let list=activities.filter(a=>{if(state.currentCity!=="全部"&&a.city!==state.currentCity)return false;if(state.typeFilter==="ai"&&a.type!=="ai")return false;if(state.typeFilter==="marathon"&&a.type!=="marathon")return false;if(state.typeFilter==="volunteer"&&!a.volunteer.recruiting)return false;if(!isWithinTime(a.date,state.timeFilter))return false;if(state.searchQuery){const q=state.searchQuery.toLowerCase();const h=(a.title+a.location+a.organizer+a.description+a.tags.join(" ")).toLowerCase();if(!h.includes(q))return false;}return true;});if(state.sortBy==="wuhan")list.sort((a,b)=>a.isWuhan!==b.isWuhan?(a.isWuhan?-1:1):new Date(a.date)-new Date(b.date));else if(state.sortBy==="volunteer")list.sort((a,b)=>a.volunteer.recruiting!==b.volunteer.recruiting?(a.volunteer.recruiting?-1:1):new Date(a.date)-new Date(b.date));else list.sort((a,b)=>new Date(a.date)-new Date(b.date));return list;}
+function renderCard(a){const days=getDaysUntil(a.date);let dt=days<0?'已结束':days===0?'今天':days===1?'明天':days<=7?`${days}天后`:formatDate(a.date);const vol=a.volunteer.recruiting?`<div class="vol-status recruiting"><span class="v-dot"></span>招募 ${a.volunteer.count} 人</div>`:`<div class="vol-status none">暂无志愿者招募</div>`;return `<div class="activity-card ${a.isWuhan?'wuhan-card':''}" data-id="${a.id}">${a.isWuhan?'<div class="wuhan-tag-corner">武汉</div>':''}<div class="card-top"><span class="type-badge ${a.type==='marathon'?'run':'ai'}"><span class="dot"></span>${getTypeLabel(a.type)} · ${a.category}</span><span class="card-date-tag">${dt}</span></div><h3 class="card-title">${a.title}</h3><p class="card-desc">${a.description}</p><div class="card-meta"><div class="meta-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="meta-value">${formatDateRange(a.date,a.endDate)}</span></div><div class="meta-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span class="meta-value">${a.city} · ${a.location}</span></div></div><div class="card-bottom">${vol}<svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div></div>`;}
+function renderList(){const list=getFiltered();const grid=document.getElementById('activityGrid');const empty=document.getElementById('emptyState');document.getElementById('resultCount').textContent=`${list.length} 场`;if(list.length===0){grid.innerHTML='';empty.style.display='block';}else{empty.style.display='none';grid.innerHTML=list.map(renderCard).join('');}grid.querySelectorAll('.activity-card').forEach(c=>c.addEventListener('click',()=>openModal(+c.dataset.id)));}
+function renderVolZone(){const va=activities.filter(a=>a.volunteer.recruiting&&(state.currentCity==="全部"||a.city===state.currentCity));const grid=document.getElementById('volunteerGrid');document.getElementById('zoneCount').textContent=va.length;const roles=new Set();va.forEach(a=>a.volunteer.roles.forEach(r=>roles.add(r)));document.getElementById('zoneRoles').textContent=roles.size;grid.innerHTML=va.map(renderCard).join('');grid.querySelectorAll('.activity-card').forEach(c=>c.addEventListener('click',()=>openModal(+c.dataset.id)));}
+function updateStats(){const ca=activities.filter(a=>state.currentCity==="全部"||a.city===state.currentCity);document.getElementById('statAi').textContent=ca.filter(a=>a.type==="ai").length;document.getElementById('statRun').textContent=ca.filter(a=>a.type==="marathon").length;document.getElementById('statVol').textContent=ca.filter(a=>a.volunteer.recruiting).length;}
+function renderCities(){const list=document.getElementById('cityList');const cc={};cities.forEach(c=>cc[c]=activities.filter(a=>a.city===c).length);cc["全部"]=activities.length;const order=["武汉",...cities.filter(c=>c!=="武汉"),"全部"];list.innerHTML=order.map(c=>`<div class="city-option ${c===state.currentCity?'active':''}" data-city="${c}"><span>${c}${c==="武汉"?' · 本地':''}</span><span class="count">${cc[c]||0}</span></div>`).join('');list.querySelectorAll('.city-option').forEach(o=>o.addEventListener('click',()=>{state.currentCity=o.dataset.city;document.getElementById('currentCity').textContent=state.currentCity;document.getElementById('wuhanTag').style.display=state.currentCity==="武汉"?'inline':'none';document.getElementById('cityDropdown').classList.remove('open');updateStats();renderList();renderVolZone();}));}
+function useGeolocation(){const btn=document.getElementById('locBtn');if(!navigator.geolocation){showToast('当前浏览器不支持定位');return;}btn.classList.add('locating');btn.querySelector('span').textContent='定位中';navigator.geolocation.getCurrentPosition(pos=>{const {latitude:lat,longitude:lng}=pos.coords;let nearest="武汉",minDist=Infinity;for(const [city,coord] of Object.entries(cityCoords)){const d=distance(lat,lng,coord.lat,coord.lng);if(d<minDist){minDist=d;nearest=city;}}state.currentCity=nearest;document.getElementById('currentCity').textContent=nearest;document.getElementById('wuhanTag').style.display=nearest==="武汉"?'inline':'none';updateStats();renderList();renderVolZone();showToast(`已定位到 ${nearest}（距您约 ${minDist.toFixed(0)} km）`);btn.classList.remove('locating');btn.querySelector('span').textContent='定位';},err=>{btn.classList.remove('locating');btn.querySelector('span').textContent='定位';showToast('定位失败，请手动选择城市');},{timeout:8000,enableHighAccuracy:false});}
+function openModal(id){const a=activities.find(x=>x.id===id);if(!a)return;document.getElementById('modalHeader').className='modal-header'+(a.isWuhan?' wuhan-h':'');document.getElementById('modalTypeRow').innerHTML=`<span class="type-badge ${a.type==='marathon'?'run':'ai'}"><span class="dot"></span>${getTypeLabel(a.type)} · ${a.category}</span>${a.isWuhan?'<span class="type-badge" style="background:var(--wuhan-soft);color:var(--wuhan);">武汉</span>':''}`;document.getElementById('modalTitle').textContent=a.title;document.getElementById('modalOrganizer').textContent=`主办方：${a.organizer}`;document.getElementById('modalInfoGrid').innerHTML=`<div class="info-block"><div class="info-label">活动时间</div><div class="info-value">${formatDateRange(a.date,a.endDate)}</div></div><div class="info-block"><div class="info-label">活动地点</div><div class="info-value">${a.city} · ${a.location}</div></div><div class="info-block"><div class="info-label">距开始</div><div class="info-value">${getDaysUntil(a.date)<0?'已结束':getDaysUntil(a.date)===0?'今天':getDaysUntil(a.date)+' 天'}</div></div><div class="info-block"><div class="info-label">活动类型</div><div class="info-value">${a.category}</div></div>`;document.getElementById('modalDesc').textContent=a.description;document.getElementById('modalTags').innerHTML=a.tags.map(t=>`<span class="modal-tag">${t}</span>`).join('');const vd=document.getElementById('modalVolunteer');if(a.volunteer.recruiting){vd.innerHTML=`<div class="vol-section"><div class="vol-section-header"><h4>志愿者招募</h4><span class="recruiting-pill">招募中</span></div><div class="vol-roles">${a.volunteer.roles.map(r=>`<span class="vol-role">${r}</span>`).join('')}</div><div class="vol-details"><div class="vol-detail"><div class="v-label">招募人数</div><div class="v-value">${a.volunteer.count} 人</div></div><div class="vol-detail"><div class="v-label">报名截止</div><div class="v-value">${a.volunteer.deadline}</div></div></div><div class="vol-benefits"><strong>福利：</strong>${a.volunteer.benefits.join('、')}</div><div class="vol-benefits" style="margin-top:6px;"><strong>报名：</strong>${a.volunteer.contact}</div></div>`;}else{vd.innerHTML=`<div class="vol-section no-vol"><div class="vol-section-header"><h4>志愿者招募</h4></div><p style="font-size:13px;color:var(--text-muted);">该活动暂未开放志愿者招募，请关注后续官方通知。</p></div>`;}document.getElementById('modalActions').innerHTML=`<button class="btn btn-outline" onclick="document.getElementById('modalOverlay').classList.remove('open')">关闭</button>${a.volunteer.recruiting?'<button class="btn btn-vol">报名志愿者</button>':''}<button class="btn btn-primary">查看详情</button>`;document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('DOMContentLoaded',()=>{const cityBtn=document.getElementById('cityBtn'),cityDropdown=document.getElementById('cityDropdown');cityBtn.addEventListener('click',e=>{e.stopPropagation();cityDropdown.classList.toggle('open');});document.addEventListener('click',e=>{if(!cityDropdown.contains(e.target)&&!cityBtn.contains(e.target))cityDropdown.classList.remove('open');});document.getElementById('locBtn').addEventListener('click',useGeolocation);document.getElementById('typeFilters').addEventListener('click',e=>{const chip=e.target.closest('.filter-chip');if(!chip)return;document.querySelectorAll('#typeFilters .filter-chip').forEach(c=>c.classList.remove('active'));chip.classList.add('active');state.typeFilter=chip.dataset.type;const zone=document.getElementById('volunteerZone'),sec=document.getElementById('activitySection');if(state.typeFilter==="volunteer"){zone.classList.add('active');sec.style.display='none';renderVolZone();}else{zone.classList.remove('active');sec.style.display='block';}renderList();});document.getElementById('timeFilters').addEventListener('click',e=>{const chip=e.target.closest('.filter-chip');if(!chip)return;document.querySelectorAll('#timeFilters .filter-chip').forEach(c=>c.classList.remove('active'));chip.classList.add('active');state.timeFilter=chip.dataset.time;renderList();});document.getElementById('sortSelect').addEventListener('change',e=>{state.sortBy=e.target.value;renderList();});let st;document.getElementById('searchInput').addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{state.searchQuery=e.target.value.trim();renderList();},200);});document.getElementById('modalClose').addEventListener('click',closeModal);document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});renderCities();updateStats();renderList();if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}});
+</script>
+</body>
+</html>
